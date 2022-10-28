@@ -20,11 +20,11 @@ public class ManualAssistant : IAssistant
         try
         {
             await _supportService.RegisterSupportRequestAsync(requestInfo);
-            return await _supportService.GetSupportInfoAsync(requestInfo);
+            return await _supportService.GetSupportInfoAsync(requestInfo).ConfigureAwait(false);
         }
         catch (HttpRequestException ex)
         {
-            return $"Failed to register assistance request. Please try later. {ex.Message}";
+            return await Task.FromResult($"Failed to register assistance request. Please try later. {ex.Message}");
         }
     }
 }

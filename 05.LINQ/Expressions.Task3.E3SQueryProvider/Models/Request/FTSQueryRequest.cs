@@ -1,17 +1,19 @@
-﻿using Newtonsoft.Json;
+﻿using Expressions.Task3.E3SQueryProvider.Attributes;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace Expressions.Task3.E3SQueryProvider.Models.Request
 {
+    [E3SMetaType("z")]
     [JsonObject]
     public class FtsQueryRequest
     {
         public FtsQueryRequest()
         {
             // todo: remove that
-            // Statements = new List<Statement>();
-            // Filters = new List<Filter>();
-            // Sorting = new SortingCollection();
+            Statements = new List<Statement>();
+            Filters = new List<Filter>();
+            Sorting = new SortingCollection();
         }
 
         [JsonProperty("statements")]

@@ -23,6 +23,21 @@ namespace Expressions.Task3.E3SQueryProvider
 
         #region protected methods
 
+        private Expression GetExpression(string left, string right, MethodCallExpression node)
+        {
+            Visit(node.Object);
+            var arg = node.Arguments[0];
+            if (arg.NodeType == ExpressionType.Constant)
+            {
+                _resultStringBuilder.Append(left);
+                Visit(arg);
+                _resultStringBuilder.Append(right);
+            }
+            else
+                Visit(arg);
+            return node;
+        }
+
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
             if (node.Method.DeclaringType == typeof(Queryable)
@@ -33,6 +48,25 @@ namespace Expressions.Task3.E3SQueryProvider
 
                 return node;
             }
+
+            if (node.Method.DeclaringType == typeof(string))
+            {
+                switch (node.Method.Name)
+                {
+                    case "Equals":
+                        return GetExpression("(", ")", node);
+
+                    case "Contains":
+                        return GetExpression("(*", "*)", node);
+
+                    case "StartsWith":
+                        return GetExpression("(", "*)", node);
+
+                    case "EndsWith":
+                        return GetExpression("(*", ")", node);
+                }
+            }
+
             return base.VisitMethodCall(node);
         }
 
@@ -41,16 +75,22 @@ namespace Expressions.Task3.E3SQueryProvider
             switch (node.NodeType)
             {
                 case ExpressionType.Equal:
-                    if (node.Left.NodeType != ExpressionType.MemberAccess)
-                        throw new NotSupportedException($"Left operand should be property or field: {node.NodeType}");
+                    var memberAccess = node.Left.NodeType == ExpressionType.MemberAccess ? node.Left : (node.Right.NodeType == ExpressionType.MemberAccess ? node.Right : null);
+                    var constant = node.Left.NodeType == ExpressionType.Constant ? node.Left : node.Right.NodeType == ExpressionType.Constant ? node.Right : null;
 
-                    if (node.Right.NodeType != ExpressionType.Constant)
-                        throw new NotSupportedException($"Right operand should be constant: {node.NodeType}");
+                    if (memberAccess is null || constant is null)
+                        throw new NotSupportedException($"Expression '{node}' is not supported");
 
-                    Visit(node.Left);
+                    Visit(memberAccess);
                     _resultStringBuilder.Append("(");
-                    Visit(node.Right);
+                    Visit(constant);
                     _resultStringBuilder.Append(")");
+                    break;
+
+                case ExpressionType.AndAlso:
+                    Visit(node.Left);
+                    _resultStringBuilder.Append(" AND ");
+                    Visit(node.Right);
                     break;
 
                 default:

@@ -1,83 +1,47 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration.UserSecrets;
+using RESTapp.Models;
+using RESTapp.Services;
+using RESTapp.Services.Interfaces;
 
 namespace RESTapp.Controllers
 {
-    public class ItemsController : Controller
+    [ApiController]
+    [Route("[controller]")]
+    public class ItemsController : ControllerBase
     {
-        // GET: ItemsController
-        public ActionResult Index()
+        private readonly IItemService _itemService;
+        public ItemsController(IItemService itemService)
         {
-            return View();
+            _itemService = itemService;
+        }
+        
+        [HttpGet]
+        public IEnumerable<Item> FilteredItems([FromQuery]int? page, [FromQuery] int? categoryId)
+        {
+            var filteredItems = _itemService.GetItems();
+            if (page != null) filteredItems = _itemService.FilterByPagination(page.Value, _itemService.GetItems());
+            if (categoryId != null) filteredItems = _itemService.FilterByCategory(categoryId.Value, filteredItems);
+            return filteredItems;
         }
 
-        // GET: ItemsController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: ItemsController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: ItemsController/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public Item Create([FromBody] Item item)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            return _itemService.AddItem(item);
         }
 
-        // GET: ItemsController/Edit/5
-        public ActionResult Edit(int id)
+        [HttpPut("{id}")]
+        public Item Put([FromBody] Item item, int id)
         {
-            return View();
+            return _itemService.UpdateItem(id, item);
         }
 
-        // POST: ItemsController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        [HttpDelete("{id}")]
+        public Item Delete(int id)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: ItemsController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: ItemsController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            return _itemService.DeleteItem(id);
         }
     }
 }

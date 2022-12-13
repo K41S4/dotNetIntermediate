@@ -9,5 +9,7 @@ namespace RESTapp.Repositories.Interfaces
         Category AddCategory(Category category);
         Category UpdateCategory(int id, Category category);
         Category DeleteCategory(int id);
+        void AddItem(int categoryId, Item item);
+        void DeleteItem(int categoryId, Item item);
     }
 }

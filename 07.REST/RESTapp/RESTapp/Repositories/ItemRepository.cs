@@ -1,4 +1,5 @@
-﻿using RESTapp.Models;
+﻿using Bogus;
+using RESTapp.Models;
 using RESTapp.Repositories.Interfaces;
 
 namespace RESTapp.Repositories
@@ -6,11 +7,14 @@ namespace RESTapp.Repositories
     public class ItemRepository : IItemRepository
     {
         List<Item> _items;
-        ICategoryRepository _categoryRepository;
-        public ItemRepository(ICategoryRepository categoryRepository)
+        public ItemRepository()
         {
             _items = new List<Item>();
-            _categoryRepository = categoryRepository;
+            var faker = new Faker<Item>()
+               .RuleFor(u => u.Id, f => f.IndexGlobal)
+               .RuleFor(u => u.Name, f => f.Name.FirstName())
+               .RuleFor(u => u.CategoryId, f => f.Random.Int(0, 4));
+            _items = faker.Generate(5);
         }
         public Item AddItem(Item item)
         {
@@ -37,7 +41,13 @@ namespace RESTapp.Repositories
 
         public Item UpdateItem(int id, Item item)
         {
-            throw new NotImplementedException();
+            var oldItem= _items.FirstOrDefault(c => c.Id == id);
+            if (oldItem != null)
+            {
+                oldItem.Name = oldItem.Name;
+                oldItem.CategoryId = oldItem.CategoryId;
+            }
+            return item;
         }
     }
 }

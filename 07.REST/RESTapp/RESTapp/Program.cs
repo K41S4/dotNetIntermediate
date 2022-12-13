@@ -17,9 +17,9 @@ namespace RESTapp
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddTransient<IItemRepository, ItemRepository>();
+            builder.Services.AddSingleton<IItemRepository, ItemRepository>();
             builder.Services.AddTransient<IItemService, ItemService>();
-            builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddSingleton<ICategoryRepository, CategoryRepository>();
             builder.Services.AddTransient<ICategoryService, CategoryService>();
 
             var app = builder.Build();
